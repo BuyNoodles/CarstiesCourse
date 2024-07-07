@@ -1,6 +1,7 @@
 using Polly;
 using Polly.Extensions.Http;
-using SearchService;
+using SearchService.Data;
+using SearchService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

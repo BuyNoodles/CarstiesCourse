@@ -1,11 +1,10 @@
 ﻿using MongoDB.Entities;
 using SearchService.Models;
 
-namespace SearchService;
+namespace SearchService.Services;
 
 public class AuctionServiceHttpClient(HttpClient httpClient, IConfiguration config)
 {
-
     public async Task<List<Item>> GetItemsForSearchDb()
     {
         string? lastUpdated = await DB.Find<Item, string>()
