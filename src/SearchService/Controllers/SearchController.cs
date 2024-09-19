@@ -20,7 +20,7 @@ public class SearchController : ControllerBase
 
         query = OrderBy(query, searchParams.OrderBy);
 
-        query = FilterBy(query, searchParams.OrderBy);
+        query = FilterBy(query, searchParams.FilterBy);
 
         if (!string.IsNullOrEmpty(searchParams.Seller))
             query.Match(x => x.Seller == searchParams.Seller);
@@ -60,6 +60,6 @@ public class SearchController : ControllerBase
                 "finished" => query.Match(x => x.AuctionEnd < DateTime.UtcNow),
                 "endingSoon" => query.Match(x => x.AuctionEnd < DateTime.UtcNow.AddHours(6)
                     && x.AuctionEnd > DateTime.UtcNow),
-                _ => query.Match(x => x.AuctionEnd < DateTime.UtcNow)
+                _ => query.Match(x => x.AuctionEnd > DateTime.UtcNow)
             };
 }
