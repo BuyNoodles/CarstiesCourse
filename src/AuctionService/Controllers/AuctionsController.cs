@@ -6,6 +6,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Contracts;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -46,11 +47,12 @@ public class AuctionsController(AuctionDbContext context,
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult> CreateAuction(CreateAuctionDto request)
     {
         Auction auction = mapper.Map<Auction>(request);
 
-        auction.Seller = "test";
+        auction.Seller = User.Identity!.Name!;
 
         await context.Auctions.AddAsync(auction);
 
@@ -70,6 +72,7 @@ public class AuctionsController(AuctionDbContext context,
     }
 
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<ActionResult> UpdateAuction(Guid id, UpdateAuctionDto request)
     {
         Auction? auction = await context.Auctions
@@ -78,6 +81,8 @@ public class AuctionsController(AuctionDbContext context,
 
         if (auction == null) return NotFound();
 
+        if (auction.Seller != User.Identity!.Name!) return Forbid();
+        
         auction.Item.Make = request.Make ?? auction.Item.Make;
         auction.Item.Model = request.Model ?? auction.Item.Model;
         auction.Item.Color = request.Color ?? auction.Item.Color;
@@ -93,6 +98,7 @@ public class AuctionsController(AuctionDbContext context,
         return BadRequest("Problem saving changes.");
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteAuction(Guid id)
     {
@@ -100,6 +106,8 @@ public class AuctionsController(AuctionDbContext context,
 
         if (auction == null) return NotFound();
 
+        if (auction.Seller != User.Identity!.Name!) return Forbid();
+        
         context.Auctions.Remove(auction);
 
         await publishEndpoint.Publish<AuctionDeleted>(new { Id = auction.Id.ToString() });
